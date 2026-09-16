@@ -1,27 +1,81 @@
 import { describe, expect, it } from 'vitest';
-import { GithubIssues } from '../nodes/GithubIssues/GithubIssues.node';
+import { OpenAnalytics } from '../nodes/OpenAnalytics/OpenAnalytics.node';
 import {
 	assertRequiredControls,
 	normalizeResourceLocator,
 	requireNonBlankDefaults,
 } from './helpers/operation-contract';
 
-describe('reusable node operation contracts', () => {
-	it('checks required controls against actual display conditions', () => {
-		const description = new GithubIssues().description;
+describe('OpenAnalytics node operation contracts', () => {
+	const node = new OpenAnalytics();
+	const description = node.description;
+
+	it('configures credentials and request defaults for Open Analytics API', () => {
+		expect(description.credentials).toEqual([{ name: 'openAnalyticsApi', required: true }]);
+		expect(description.requestDefaults?.headers).toEqual({
+			Accept: 'application/json',
+			'Content-Type': 'application/json',
+		});
+		expect(description.requestDefaults?.baseURL).toContain('api.getopen.so');
+	});
+
+	it('enforces required controls for site operations', () => {
 		expect(() =>
 			assertRequiredControls(description, {
-				resource: 'issue',
-				operation: 'create',
-				requiredControls: ['title'],
+				resource: 'site',
+				operation: 'get',
+				requiredControls: ['siteId'],
 			}),
 		).not.toThrow();
-		const title = description.properties.find(({ name }) => name === 'title');
-		expect(title?.required).toBe(true);
-		expect(title?.displayOptions?.show).toEqual({
-			resource: ['issue'],
-			operation: ['create'],
-		});
+
+		expect(() =>
+			assertRequiredControls(description, {
+				resource: 'site',
+				operation: 'getAll',
+				requiredControls: [],
+			}),
+		).not.toThrow();
+	});
+
+	it('enforces required controls for all analytics operations', () => {
+		const analyticsOperations = [
+			'getOverview',
+			'getTimeseries',
+			'getPages',
+			'getSources',
+			'getGeography',
+			'getDevices',
+			'getSessions',
+		];
+
+		for (const operation of analyticsOperations) {
+			expect(() =>
+				assertRequiredControls(description, {
+					resource: 'analytics',
+					operation,
+					requiredControls: ['siteId', 'from', 'to'],
+				}),
+			).not.toThrow();
+		}
+	});
+
+	it('configures declarative routing on all site and analytics operations', () => {
+		const operationProperties = description.properties.filter(
+			(property) => property.name === 'operation',
+		);
+		expect(operationProperties.length).toBeGreaterThanOrEqual(2);
+
+		for (const prop of operationProperties) {
+			const options = prop.options as Array<{
+				name: string;
+				value: string;
+				routing?: { request?: { method?: string; url?: string } };
+			}>;
+			for (const opt of options) {
+				expect(opt.routing?.request?.method).toBe('GET');
+				expect(opt.routing?.request?.url).toMatch(/^\/v1\/read\//);
+			}
+		}
 	});
 
 	it('normalizes manual and list-mode resource locator values', () => {
@@ -34,7 +88,7 @@ describe('reusable node operation contracts', () => {
 		);
 	});
 
-	it('demonstrates a test-contract preflight before a mocked transport call', () => {
+	it('demonstrates a test-contract preflight before a transport call', () => {
 		let transportCalls = 0;
 		const execute = () => {
 			requireNonBlankDefaults({ name: '' }, ['name']);
