@@ -24,7 +24,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/devices',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -44,7 +44,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/geography',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -64,7 +64,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/overview',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -84,7 +84,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/pages',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -104,7 +104,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/sessions',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -124,7 +124,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/sources',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -144,7 +144,7 @@ export const analyticsDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/analytics/timeseries',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 						qs: {
 							from: '={{$parameter.from}}',
@@ -158,15 +158,33 @@ export const analyticsDescription: INodeProperties[] = [
 		default: 'getOverview',
 	},
 	{
-		displayName: 'Site ID',
+		displayName: 'Site',
 		name: 'siteId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
 		required: true,
-		default: '',
 		displayOptions: {
 			show: showOnlyForAnalytics,
 		},
-		description: 'The site ID / tracking ID',
+		description: 'The site to query. Choose from the list, or specify an ID.',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a site...',
+				typeOptions: {
+					searchListMethod: 'getSites',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. site_12345',
+			},
+		],
 	},
 	{
 		displayName: 'From',
