@@ -1,84 +1,78 @@
-# Black Swamp n8n community-node template
+# n8n-nodes-openanalytics
 
-A fail-closed TypeScript starter for production-quality n8n community integrations. It uses a declarative GitHub Issues implementation as the canonical REST example and adds strict Vitest tests, release audits, and provenance-ready GitHub Actions.
+Query web analytics data from Open Analytics directly within your n8n workflows.
 
-> [!WARNING]
-> This repository is a template, not a publishable integration. `private: true` intentionally blocks publication. The examples, identity, and this README must be removed or adapted after generating a project.
+> This is an independent community integration and is not affiliated with, endorsed by, sponsored by, or maintained by OpenLabs or Open Analytics. Product names and marks belong to their respective owners and are used only to identify compatibility.
 
-## Start from the template
+[Installation](#installation) · [Compatibility](#compatibility) · [Credentials](#credentials) · [Operations](#operations) · [Usage](#usage) · [Troubleshooting](#troubleshooting) · [Resources](#resources) · [Black Swamp AI](https://blackswampai.com/n8n-nodes/openanalytics/)
 
-1. Select **Use this template → Create a new repository** on GitHub.
-2. Create the final public repository, then clone it.
-3. Work in bounded, reviewed batches; do not create a version tag during initialization.
+## Installation
 
-```sh
-git clone https://github.com/YOUR-OWNER/YOUR-REPOSITORY.git
-cd YOUR-REPOSITORY
-npm ci
-```
+This package is not currently available through verified-node discovery. On self-hosted n8n, open **Settings → Community Nodes**, select **Install**, and enter `n8n-nodes-openanalytics`. For details, see the [n8n community node installation guide](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/).
 
-## Deterministic initialization checklist
+## Compatibility
 
-- Choose the final GitHub repository and scoped or unscoped `n8n-nodes-*` npm name.
-- Replace package name, description, author, homepage, repository, keywords, and node metadata URLs/categories. Black Swamp AI packages use `https://blackswampai.com/n8n-nodes/<slug>/` as their npm homepage.
-- Choose and document exactly one distribution state: verified-node discovery, manual self-hosted **Settings → Community Nodes**, or private/unavailable. Verification status must come from the actual n8n distribution state, not package metadata.
-- Replace this file with `README_TEMPLATE.md`, rename it to `README.md`, and resolve every placeholder.
-- Replace or adapt the GitHub Issues node, credentials, icons, and registrations.
-- Start ordinary REST API nodes with declarative routing. Evaluate routing, expressions, pagination, `preSend`, and `postReceive` before choosing programmatic execution, and document any exception in the API matrix.
-- Replace or remove raw-template invariant tests, especially `tests/template.test.ts`, when removing `private: true` and the example registrations; add product-specific invariants in their place.
-- Copy and complete `docs/API_MATRIX_TEMPLATE.md` as `docs/api-matrix.md`, `docs/TESTING_TEMPLATE.md` as `docs/testing.md`, and `docs/BRANDING_TEMPLATE.md` as `docs/branding.md`. Remove the uppercase template copies after migration; unresolved placeholders or missing final documents fail the generated repository's release audit.
-- Register every intended compiled node and credential using stable `dist/` paths.
-- Keep `private: true` until identity, documentation, tests, and registration are final; then remove it.
-- Run `npm install` once after identity/tooling changes and commit the regenerated lockfile.
-- Start follow-up/migration branches from the current post-squash `main`. Do not replay an already-squashed feature branch.
-- Inspect inherited `.npmrc` files. `engine-strict=true` must not reject either the Node 22.22.0 or Node 24 CI lane.
-- Run `npm run format:check`, `npm run lint`, `npm run typecheck`, `npm test`, `npm run build`, and `npm run package:check`.
-- Install or load the dry-run package in a disposable n8n instance before release.
-- Never tag early. Only an explicitly authorized, reviewed release commit receives an immutable version tag.
+| Surface             | Tested baseline | Notes                                                          |
+| ------------------- | --------------- | -------------------------------------------------------------- |
+| n8n                 | >=1.0.0         | Tested against declarative REST execution baseline             |
+| Service/API         | v1              | Compatible with Open Analytics Cloud and self-hosted instances |
+| Node.js development | 22.22.0 and 24  | CI and package checks run on both lanes.                       |
 
-## Declarative-first implementation policy
+Do not present verified-node distribution as evidence of broader service, API, or runtime compatibility.
 
-`nodes/GithubIssues/` and `credentials/` are the sole canonical example. They demonstrate a declarative REST API node, list search, pagination, PAT, and OAuth credentials.
+## Credentials
 
-Use declarative routing by default for ordinary REST APIs. First evaluate routing, expressions, pagination, `preSend`, and `postReceive`; these cover many unusual request bodies, response wrappers, and pagination schemes without a custom `execute` method.
+Authenticate requests using an Open Analytics API key:
 
-Choose programmatic style only when a specific requirement calls for it, such as a trigger, GraphQL or another non-REST protocol, an external runtime dependency, incoming-data transformation, full node versioning, or behavior declarative routing cannot safely express. Record that requirement and the rejected declarative options in the API matrix. Generic "weird JSON" is not sufficient evidence.
+1. In Open Analytics, open **Settings → API** (or your site settings) to create an API Bearer key.
+2. In n8n, open **Credentials → New Credential**, and choose **Open Analytics API**.
+3. Enter your **API Key**.
+4. (Optional) Set the **Base URL** to your self-hosted instance (defaults to `https://api.getopen.so`).
 
-The GitHub Issues files are learning fixtures. Shipping their names, registrations, or credentials in an unrelated integration is a release-audit failure.
+All requests include the Bearer token in the `Authorization` header.
 
-## Development commands
+## Operations
 
-| Command                 | Purpose                                             |
-| ----------------------- | --------------------------------------------------- |
-| `npm run dev`           | Run the local n8n node development environment      |
-| `npm run format:check`  | Check formatting                                    |
-| `npm run lint`          | Run n8n community-node lint rules                   |
-| `npm run typecheck`     | Strictly check production and test TypeScript       |
-| `npm test`              | Run all `*.test.ts` files with Vitest               |
-| `npm run build`         | Compile nodes and copy static assets                |
-| `npm run scan:source`   | Apply the pinned official scanner to source/build   |
-| `npm run release:check` | Validate template mode or final release identity    |
-| `npm run package:check` | Audit and inspect the dry-run npm tarball boundary  |
-| `npm run smoke:load`    | Load every compiled package registration            |
-| `npm run smoke:install` | Install and load the tarball in an isolated project |
+### Site
 
-The tag workflow separates one-time npm publication from a dependent registry/provenance verifier. If npm publication succeeds and only verification fails, rerun only failed jobs; never rerun the successful publish job for that immutable version.
+- **Get Many (`getAll`)**: Retrieve all sites accessible by the current credential (`GET /v1/read/sites`).
+- **Get (`get`)**: Fetch metadata and tracking script installation details for a specific site (`GET /v1/read/site`).
 
-Read `RELEASING.md` before changing `private`, creating a tag, or configuring npm publishing.
-Use `docs/BATCH_HANDOFF_TEMPLATE.md` to keep implementation work bounded and evidence-driven. Generated repositories do not inherit later template improvements; follow `docs/TEMPLATE_MIGRATIONS.md` and retain `.blackswamp/template.json` to track explicitly adopted migrations.
+### Analytics
 
-Reusable project templates:
+All analytics operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header):
 
-- `docs/API_MATRIX_TEMPLATE.md`
-- `docs/TESTING_TEMPLATE.md`
-- `docs/BRANDING_TEMPLATE.md`
+- **Get Overview (`getOverview`)**: Fetch aggregate metrics including events, pageviews, and unique visitors (`GET /v1/read/analytics/overview`). Supports optional comparison with preceding period and time grain resolution (`hour`, `day`).
+- **Get Timeseries (`getTimeseries`)**: Fetch time-series metric data points (`GET /v1/read/analytics/timeseries`). Supports optional time grain resolution (`hour`, `day`, `week`).
+- **Get Pages (`getPages`)**: Top pages breakdown ranked by views and visitors (`GET /v1/read/analytics/pages`).
+- **Get Sources (`getSources`)**: Breakdown of inbound referrers and campaigns (`GET /v1/read/analytics/sources`).
+- **Get Geography (`getGeography`)**: Breakdown of visits by country and city (`GET /v1/read/analytics/geography`).
+- **Get Devices (`getDevices`)**: Breakdown of device types, browsers, and operating systems (`GET /v1/read/analytics/devices`).
+- **Get Sessions (`getSessions`)**: Bounce rate and visit duration engagement metrics (`GET /v1/read/analytics/sessions`).
 
-## Upstream resources
+## Usage
 
-- [n8n node development](https://docs.n8n.io/integrations/creating-nodes/)
-- [Choose a node-building style](https://docs.n8n.io/connect/create-nodes/plan-your-node/choose-a-node-building-style)
-- [Community-node verification](https://docs.n8n.io/integrations/creating-nodes/build/reference/verification-guidelines/)
-- [npm Trusted Publishers](https://docs.npmjs.com/trusted-publishers/)
+- **Timestamp Formatting**: The `from` and `to` date range parameters require full ISO-8601 UTC timestamp strings (for example, `2026-09-01T00:00:00.000Z`). Date-only strings such as `2026-09-01` return a 400 Bad Request error from the API.
+- **Site Header**: Site-scoped requests automatically transmit the `siteId` parameter via the `x-oa-site` header.
+- **Timezone**: Set the `timezone` parameter to a valid IANA timezone identifier (such as `UTC` or `America/New_York`) to control day boundary bucketing.
+
+## Troubleshooting
+
+- Confirm the base URL, account or organization scope, and credential permissions.
+- Verify that `from` and `to` timestamps are valid ISO-8601 UTC strings ending with `Z`.
+- Re-select dynamic list values after changing credentials or a parent selector.
+- Check HTTP 429 responses for `Retry-After` header values when approaching rate limits.
+- Report reproducible defects in [GitHub Issues](https://github.com/BlackSwampAI/n8n-nodes-openanalytics/issues) without including secrets.
+
+## Resources
+
+- [Black Swamp AI package page](https://blackswampai.com/n8n-nodes/openanalytics/)
+- [n8n community nodes documentation](https://docs.n8n.io/integrations/community-nodes/)
+- [Changelog](CHANGELOG.md)
+- [API and operation matrix](docs/api-matrix.md)
+- [Compatibility and testing notes](docs/testing.md)
+- [Branding and independence notes](docs/branding.md)
+- [Open Analytics API Documentation](https://getopen.so/docs/api)
 
 ## License
 

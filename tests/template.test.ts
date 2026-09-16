@@ -4,17 +4,31 @@ import { access, readFile } from 'node:fs/promises';
 import { describe, expect, it } from 'vitest';
 
 const read = (path: string) => readFile(new URL(`../${path}`, import.meta.url), 'utf8');
+const exists = async (path: string) => {
+	try {
+		await access(new URL(`../${path}`, import.meta.url));
+		return true;
+	} catch {
+		return false;
+	}
+};
+const hasPlaceholder = (value: string) =>
+	/<[A-Z][A-Z0-9_ -]*>/.test(value) ||
+	/\b(?:TODO|CHANGEME)\b/i.test(value) ||
+	/YOUR[-_][A-Z0-9_-]+/.test(value);
 
-describe('raw template safety and tooling', () => {
-	it('is private and keeps only the canonical declarative example registered', async () => {
+describe('n8n-nodes-openanalytics package invariants and tooling', () => {
+	it('identifies openanalytics node package identity and registrations', async () => {
 		const packageJson = JSON.parse(await read('package.json')) as {
+			name: string;
 			private?: boolean;
 			packageManager?: string;
 			engines: { node: string };
 			devDependencies: Record<string, string>;
 			n8n: { nodes: string[]; credentials: string[] };
 		};
-		expect(packageJson.private).toBe(true);
+		expect(packageJson.name).toBe('n8n-nodes-openanalytics');
+		expect(packageJson.private).toBeUndefined();
 		expect(packageJson.packageManager).toBe('npm@11.19.0');
 		expect(packageJson.engines.node).toBe('>=22.22.0');
 		expect(packageJson.devDependencies).toMatchObject({
@@ -26,31 +40,27 @@ describe('raw template safety and tooling', () => {
 			typescript: '5.9.3',
 			vitest: '4.1.11',
 		});
-		expect(packageJson.n8n.nodes).toEqual(['dist/nodes/GithubIssues/GithubIssues.node.js']);
+		expect(packageJson.n8n.nodes).toEqual(['dist/nodes/OpenAnalytics/OpenAnalytics.node.js']);
 		expect(packageJson.n8n.credentials).toEqual([
-			'dist/credentials/GithubIssuesApi.credentials.js',
-			'dist/credentials/GithubIssuesOAuth2Api.credentials.js',
+			'dist/credentials/OpenAnalyticsApi.credentials.js',
 		]);
 	});
 
-	it('uses declarative routing for the default REST example', async () => {
-		const [node, issue, issueComment] = await Promise.all([
-			read('nodes/GithubIssues/GithubIssues.node.ts'),
-			read('nodes/GithubIssues/resources/issue/index.ts'),
-			read('nodes/GithubIssues/resources/issueComment/index.ts'),
+	it('uses declarative routing for Open Analytics node', async () => {
+		const [node, analytics, site] = await Promise.all([
+			read('nodes/OpenAnalytics/OpenAnalytics.node.ts'),
+			read('nodes/OpenAnalytics/resources/analytics.ts'),
+			read('nodes/OpenAnalytics/resources/site.ts'),
 		]);
 		expect(node).toContain('requestDefaults:');
-		expect(`${issue}\n${issueComment}`).toContain('routing:');
+		expect(`${analytics}\n${site}`).toContain('routing:');
 		expect(node).not.toMatch(/\bexecute\s*[=(:]/);
-		for (const removedExamplePath of [
-			'Example.node.ts',
-			'Example.node.json',
-			'example.svg',
-			'example.dark.svg',
+		for (const removedPath of [
+			'nodes/GithubIssues',
+			'credentials/GithubIssuesApi.credentials.ts',
+			'credentials/GithubIssuesOAuth2Api.credentials.ts',
 		]) {
-			await expect(
-				access(new URL(`../nodes/Example/${removedExamplePath}`, import.meta.url)),
-			).rejects.toThrow();
+			await expect(access(new URL(`../${removedPath}`, import.meta.url))).rejects.toThrow();
 		}
 	});
 
@@ -79,14 +89,13 @@ describe('raw template safety and tooling', () => {
 	});
 
 	it('requires a documented exception before programmatic REST execution', async () => {
-		const [agents, readme, apiMatrix, testing, handoff] = await Promise.all([
+		const [agents, apiMatrix, testing, handoff] = await Promise.all([
 			read('AGENTS.md'),
-			read('README.md'),
-			read('docs/API_MATRIX_TEMPLATE.md'),
-			read('docs/TESTING_TEMPLATE.md'),
+			read('docs/api-matrix.md'),
+			read('docs/testing.md'),
 			read('docs/BATCH_HANDOFF_TEMPLATE.md'),
 		]);
-		for (const policy of [agents, readme]) {
+		for (const policy of [agents]) {
 			expect(policy).toContain('declarative routing');
 			expect(policy).toContain('`preSend`');
 			expect(policy).toContain('`postReceive`');
@@ -103,23 +112,26 @@ describe('raw template safety and tooling', () => {
 	});
 
 	it('requires generated repositories to finalize documentation templates', async () => {
-		const [releaseCheck, readme, readmeTemplate] = await Promise.all([
+		const [releaseCheck, readme] = await Promise.all([
 			read('scripts/release-check.mjs'),
 			read('README.md'),
-			read('README_TEMPLATE.md'),
 		]);
 		for (const path of ['docs/api-matrix.md', 'docs/testing.md', 'docs/branding.md']) {
 			expect(releaseCheck).toContain(path);
 			expect(readme).toContain(path);
+			expect(await exists(path)).toBe(true);
+			expect(hasPlaceholder(await read(path))).toBe(false);
+		}
+		for (const templatePath of [
+			'docs/API_MATRIX_TEMPLATE.md',
+			'docs/TESTING_TEMPLATE.md',
+			'docs/BRANDING_TEMPLATE.md',
+			'README_TEMPLATE.md',
+		]) {
+			expect(await exists(templatePath)).toBe(false);
 		}
 		expect(releaseCheck).toContain('still contains template placeholders');
 		expect(releaseCheck).toContain('remove template source document');
-		expect(releaseCheck).toContain('raw template must retain');
-		expect(readmeTemplate).toContain('install-verified-community-nodes/');
-		expect(readmeTemplate).toContain('installation-and-management/gui-installation/');
-		expect(readmeTemplate).toContain('Private/unavailable:');
-		expect(readmeTemplate).toContain('https://blackswampai.com/n8n-nodes/<PACKAGE_SLUG>/');
-		expect(readmeTemplate).not.toContain('/community-nodes/installation/');
 	});
 
 	it('keeps release and publish safeguards', async () => {
@@ -181,8 +193,6 @@ describe('raw template safety and tooling', () => {
 		expect(await read('scripts/node-load-smoke.mjs')).toContain(
 			'Packaged SVG icon needs a usable viewBox',
 		);
-		expect(await read('docs/BRANDING_TEMPLATE.md')).toContain(
-			'Creator Portal card version and logo',
-		);
+		expect(await read('docs/branding.md')).toContain('Creator Portal card version and logo');
 	});
 });
