@@ -36,11 +36,11 @@ All requests include the Bearer token in the `Authorization` header.
 ### Site
 
 - **Get Many (`getAll`)**: Retrieve all sites accessible by the current credential (`GET /v1/read/sites`).
-- **Get (`get`)**: Fetch metadata and tracking script installation details for a specific site (`GET /v1/read/site`).
+- **Get (`get`)**: Fetch metadata and tracking script installation details for a specific site (`GET /v1/read/site`). The target site can be selected dynamically from the dropdown list or specified by ID.
 
 ### Analytics
 
-All analytics operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header):
+All analytics operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
 
 - **Get Overview (`getOverview`)**: Fetch aggregate metrics including events, pageviews, and unique visitors (`GET /v1/read/analytics/overview`). Supports optional comparison with preceding period and time grain resolution (`hour`, `day`).
 - **Get Timeseries (`getTimeseries`)**: Fetch time-series metric data points (`GET /v1/read/analytics/timeseries`). Supports optional time grain resolution (`hour`, `day`, `week`).
@@ -52,6 +52,7 @@ All analytics operations query data for a specific site identified by the `siteI
 
 ## Usage
 
+- **Site Selection**: Sites can be selected dynamically from the dropdown list (`From List`, powered by dynamic search against `/v1/read/sites`) or specified directly by ID (`By ID`).
 - **Timestamp Formatting**: The `from` and `to` date range parameters require full ISO-8601 UTC timestamp strings (for example, `2026-09-01T00:00:00.000Z`). Date-only strings such as `2026-09-01` return a 400 Bad Request error from the API.
 - **Site Header**: Site-scoped requests automatically transmit the `siteId` parameter via the `x-oa-site` header.
 - **Timezone**: Set the `timezone` parameter to a valid IANA timezone identifier (such as `UTC` or `America/New_York`) to control day boundary bucketing.

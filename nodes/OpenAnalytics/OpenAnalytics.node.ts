@@ -1,8 +1,14 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
 import { analyticsDescription } from './resources/analytics';
 import { siteDescription } from './resources/site';
+import { getSites } from './listSearch/getSites';
 
 export class OpenAnalytics implements INodeType {
+	methods = {
+		listSearch: {
+			getSites,
+		},
+	};
 	description: INodeTypeDescription = {
 		displayName: 'Open Analytics',
 		name: 'openAnalytics',

@@ -19,6 +19,35 @@ describe('OpenAnalytics node operation contracts', () => {
 		expect(description.requestDefaults?.baseURL).toContain('api.getopen.so');
 	});
 
+	it('configures methods.listSearch with getSites', () => {
+		expect(node.methods?.listSearch?.getSites).toBeDefined();
+		expect(typeof node.methods?.listSearch?.getSites).toBe('function');
+	});
+
+	it('configures siteId as a resourceLocator with getSites in site and analytics resources', () => {
+		const siteIdProperties = description.properties.filter(
+			(property) => property.name === 'siteId',
+		);
+		expect(siteIdProperties).toHaveLength(2);
+
+		for (const prop of siteIdProperties) {
+			expect(prop.type).toBe('resourceLocator');
+			expect(prop.default).toEqual({ mode: 'list', value: '' });
+			expect(prop.required).toBe(true);
+			expect(prop.modes).toBeDefined();
+
+			const listMode = prop.modes?.find((m) => m.name === 'list');
+			expect(listMode).toBeDefined();
+			expect(listMode?.type).toBe('list');
+			expect(listMode?.typeOptions?.searchListMethod).toBe('getSites');
+			expect(listMode?.typeOptions?.searchable).toBe(true);
+
+			const idMode = prop.modes?.find((m) => m.name === 'id');
+			expect(idMode).toBeDefined();
+			expect(idMode?.type).toBe('string');
+		}
+	});
+
 	it('enforces required controls for site operations', () => {
 		expect(() =>
 			assertRequiredControls(description, {

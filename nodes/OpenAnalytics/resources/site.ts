@@ -24,7 +24,7 @@ export const siteDescription: INodeProperties[] = [
 						method: 'GET',
 						url: '/v1/read/site',
 						headers: {
-							'x-oa-site': '={{$parameter.siteId}}',
+							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
 						},
 					},
 				},
@@ -45,17 +45,35 @@ export const siteDescription: INodeProperties[] = [
 		default: 'getAll',
 	},
 	{
-		displayName: 'Site ID',
+		displayName: 'Site',
 		name: 'siteId',
-		type: 'string',
+		type: 'resourceLocator',
+		default: { mode: 'list', value: '' },
 		required: true,
-		default: '',
 		displayOptions: {
 			show: {
 				...showOnlyForSite,
 				operation: ['get'],
 			},
 		},
-		description: 'The site ID / tracking ID',
+		description: 'The site to query. Choose from the list, or specify an ID.',
+		modes: [
+			{
+				displayName: 'From List',
+				name: 'list',
+				type: 'list',
+				placeholder: 'Select a site...',
+				typeOptions: {
+					searchListMethod: 'getSites',
+					searchable: true,
+				},
+			},
+			{
+				displayName: 'By ID',
+				name: 'id',
+				type: 'string',
+				placeholder: 'e.g. site_12345',
+			},
+		],
 	},
 ];
