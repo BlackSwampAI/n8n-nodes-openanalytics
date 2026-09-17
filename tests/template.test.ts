@@ -17,7 +17,7 @@ const hasPlaceholder = (value: string) =>
 	/\b(?:TODO|CHANGEME)\b/i.test(value) ||
 	/YOUR[-_][A-Z0-9_-]+/.test(value);
 
-describe('n8n-nodes-openanalytics package invariants and tooling', () => {
+describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling', () => {
 	it('identifies openanalytics node package identity and registrations', async () => {
 		const packageJson = JSON.parse(await read('package.json')) as {
 			name: string;
@@ -27,7 +27,7 @@ describe('n8n-nodes-openanalytics package invariants and tooling', () => {
 			devDependencies: Record<string, string>;
 			n8n: { nodes: string[]; credentials: string[] };
 		};
-		expect(packageJson.name).toBe('n8n-nodes-openanalytics');
+		expect(packageJson.name).toBe('@blackswampai/n8n-nodes-openanalytics');
 		expect(packageJson.private).toBeUndefined();
 		expect(packageJson.packageManager).toBe('npm@11.19.0');
 		expect(packageJson.engines.node).toBe('>=22.22.0');
