@@ -24,11 +24,11 @@ describe('OpenAnalytics node operation contracts', () => {
 		expect(typeof node.methods?.listSearch?.getSites).toBe('function');
 	});
 
-	it('configures siteId as a resourceLocator with getSites in site and analytics resources', () => {
+	it('configures siteId as a resourceLocator with getSites in site, analytics, and revenue resources', () => {
 		const siteIdProperties = description.properties.filter(
 			(property) => property.name === 'siteId',
 		);
-		expect(siteIdProperties).toHaveLength(2);
+		expect(siteIdProperties).toHaveLength(3);
 
 		for (const prop of siteIdProperties) {
 			expect(prop.type).toBe('resourceLocator');
@@ -88,11 +88,25 @@ describe('OpenAnalytics node operation contracts', () => {
 		}
 	});
 
-	it('configures declarative routing on all site and analytics operations', () => {
+	it('enforces required controls for revenue operations', () => {
+		const revenueOperations = ['getSummary', 'getTimeseries'];
+
+		for (const operation of revenueOperations) {
+			expect(() =>
+				assertRequiredControls(description, {
+					resource: 'revenue',
+					operation,
+					requiredControls: ['siteId', 'from', 'to'],
+				}),
+			).not.toThrow();
+		}
+	});
+
+	it('configures declarative routing on all site, analytics, and revenue operations', () => {
 		const operationProperties = description.properties.filter(
 			(property) => property.name === 'operation',
 		);
-		expect(operationProperties.length).toBeGreaterThanOrEqual(2);
+		expect(operationProperties.length).toBeGreaterThanOrEqual(3);
 
 		for (const prop of operationProperties) {
 			const options = prop.options as Array<{
