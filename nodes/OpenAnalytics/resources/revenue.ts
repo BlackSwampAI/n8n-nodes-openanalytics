@@ -38,7 +38,7 @@ export const revenueDescription: INodeProperties[] = [
 				name: 'Get Timeseries',
 				value: 'getTimeseries',
 				action: 'Get revenue timeseries',
-				description: 'Get revenue metrics over time at a specified grain resolution',
+				description: 'Get revenue metrics over time at a specified resolution',
 				routing: {
 					request: {
 						method: 'GET',
@@ -186,8 +186,8 @@ export const revenueDescription: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Grain',
-				name: 'grain',
+				displayName: 'Resolution',
+				name: 'resolution',
 				type: 'options',
 				options: [
 					{
@@ -198,21 +198,13 @@ export const revenueDescription: INodeProperties[] = [
 						name: 'Hour',
 						value: 'hour',
 					},
-					{
-						name: 'Month',
-						value: 'month',
-					},
-					{
-						name: 'Week',
-						value: 'week',
-					},
 				],
 				default: 'day',
-				description: 'Explicit time grain resolution',
+				description: 'Explicit time resolution (hour, day)',
 				routing: {
 					send: {
 						type: 'query',
-						property: 'grain',
+						property: 'resolution',
 					},
 				},
 			},

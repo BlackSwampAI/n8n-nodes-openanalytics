@@ -138,7 +138,7 @@ export const analyticsDescription: INodeProperties[] = [
 				name: 'Get Timeseries',
 				value: 'getTimeseries',
 				action: 'Get timeseries chart data',
-				description: 'The chart series data at an honest grain',
+				description: 'The chart series data at an honest resolution',
 				routing: {
 					request: {
 						method: 'GET',
@@ -245,8 +245,8 @@ export const analyticsDescription: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Grain',
-				name: 'grain',
+				displayName: 'Resolution',
+				name: 'resolution',
 				type: 'options',
 				options: [
 					{
@@ -259,11 +259,11 @@ export const analyticsDescription: INodeProperties[] = [
 					},
 				],
 				default: 'day',
-				description: 'Explicit time grain resolution',
+				description: 'Explicit time resolution (hour, day)',
 				routing: {
 					send: {
 						type: 'query',
-						property: 'grain',
+						property: 'resolution',
 					},
 				},
 			},
@@ -283,8 +283,8 @@ export const analyticsDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Grain',
-				name: 'grain',
+				displayName: 'Resolution',
+				name: 'resolution',
 				type: 'options',
 				options: [
 					{
@@ -301,11 +301,11 @@ export const analyticsDescription: INodeProperties[] = [
 					},
 				],
 				default: 'day',
-				description: 'Explicit time grain resolution',
+				description: 'Explicit time resolution (hour, day, week)',
 				routing: {
 					send: {
 						type: 'query',
-						property: 'grain',
+						property: 'resolution',
 					},
 				},
 			},

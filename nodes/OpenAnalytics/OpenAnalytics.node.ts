@@ -1,6 +1,5 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
 import { analyticsDescription } from './resources/analytics';
-import { realtimeDescription } from './resources/realtime';
 import { revenueDescription } from './resources/revenue';
 import { siteDescription } from './resources/site';
 import { getSites } from './listSearch/getSites';
@@ -53,10 +52,6 @@ export class OpenAnalytics implements INodeType {
 						value: 'analytics',
 					},
 					{
-						name: 'Realtime',
-						value: 'realtime',
-					},
-					{
 						name: 'Revenue',
 						value: 'revenue',
 					},
@@ -68,7 +63,6 @@ export class OpenAnalytics implements INodeType {
 				default: 'analytics',
 			},
 			...analyticsDescription,
-			...realtimeDescription,
 			...revenueDescription,
 			...siteDescription,
 		],

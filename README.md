@@ -42,8 +42,8 @@ All requests include the Bearer token in the `Authorization` header.
 
 All analytics operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
 
-- **Get Overview (`getOverview`)**: Fetch aggregate metrics including events, pageviews, and unique visitors (`GET /v1/read/analytics/overview`). Supports optional comparison with preceding period and time grain resolution (`hour`, `day`).
-- **Get Timeseries (`getTimeseries`)**: Fetch time-series metric data points (`GET /v1/read/analytics/timeseries`). Supports optional time grain resolution (`hour`, `day`, `week`).
+- **Get Overview (`getOverview`)**: Fetch aggregate metrics including events, pageviews, and unique visitors (`GET /v1/read/analytics/overview`). Supports optional comparison with preceding period and time resolution (`hour`, `day`).
+- **Get Timeseries (`getTimeseries`)**: Fetch time-series metric data points (`GET /v1/read/analytics/timeseries`). Supports time resolution (`hour`, `day`, `week`).
 - **Get Pages (`getPages`)**: Top pages breakdown ranked by views and visitors (`GET /v1/read/analytics/pages`).
 - **Get Sources (`getSources`)**: Breakdown of inbound referrers and campaigns (`GET /v1/read/analytics/sources`).
 - **Get Geography (`getGeography`)**: Breakdown of visits by country and city (`GET /v1/read/analytics/geography`).
@@ -55,11 +55,7 @@ All analytics operations query data for a specific site identified by the `siteI
 All revenue operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
 
 - **Get Summary (`getSummary`)**: Fetch revenue totals, MRR, paying users, and conversion statistics (`GET /v1/read/revenue/summary`). Supports optional comparison with preceding period and currency filtering.
-- **Get Timeseries (`getTimeseries`)**: Fetch time-bucketed revenue metrics (`GET /v1/read/revenue/timeseries`). Supports time grain resolution (`hour`, `day`, `week`, `month`) and currency filtering.
-
-### Realtime
-
-- **Get Token (`getToken`)**: Generate a short-lived authentication token for the realtime visitor stream and live presence check (`POST /v1/read/realtime/token`). The target site can be selected dynamically from the dropdown list or specified by ID.
+- **Get Timeseries (`getTimeseries`)**: Fetch time-bucketed revenue metrics (`GET /v1/read/revenue/timeseries`). Supports time resolution (`hour`, `day`) and currency filtering.
 
 ## Usage
 

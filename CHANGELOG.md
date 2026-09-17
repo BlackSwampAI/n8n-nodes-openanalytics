@@ -1,6 +1,13 @@
 # Changelog
 
-## Unreleased
+## 0.1.0
 
-- Refresh the raw template with fail-closed publication safety, strict TypeScript/Vitest tests, comprehensive CI, and provenance-ready release guidance.
-- Add Template 2.0.1 guidance for canonical Black Swamp READMEs, explicit distribution modes, official icon provenance, split npm publication/verification jobs, and narrowly bounded provenance-source propagation retries.
+Initial release.
+
+- Add Open Analytics API credentials with Cloud and self-hosted support.
+- Add dynamic site discovery and manual site ID selection.
+- Add Site Get and Get Many.
+- Add Analytics Overview, Timeseries, Pages, Sources, Geography, Devices, and Sessions.
+- Add Revenue Summary and Timeseries.
+- Add n8n AI Tool support.
+- Add strict TypeScript, Vitest, n8n scanner, package, and installation validation.
