@@ -1,5 +1,5 @@
 {
-	"name": "n8n-nodes-openanalytics",
+	"name": "@blackswampai/n8n-nodes-openanalytics",
 	"version": "0.1.0",
 	"packageManager": "npm@11.19.0",
 	"description": "n8n community node for Open Analytics, an open-source and privacy-first web analytics platform",

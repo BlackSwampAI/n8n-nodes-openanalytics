@@ -1,5 +1,5 @@
 {
-	"node": "n8n-nodes-openanalytics.openAnalytics",
+	"node": "@blackswampai/n8n-nodes-openanalytics.openAnalytics",
 	"nodeVersion": "1.0",
 	"codexVersion": "1.0",
 	"categories": ["Analytics"],

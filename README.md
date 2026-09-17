@@ -1,4 +1,4 @@
-# n8n-nodes-openanalytics
+# @blackswampai/n8n-nodes-openanalytics
 
 Query web analytics data from Open Analytics directly within your n8n workflows.
 
@@ -8,7 +8,7 @@ Query web analytics data from Open Analytics directly within your n8n workflows.
 
 ## Installation
 
-This package is not currently available through verified-node discovery. On self-hosted n8n, open **Settings → Community Nodes**, select **Install**, and enter `n8n-nodes-openanalytics`. For details, see the [n8n community node installation guide](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/).
+This package is not currently available through verified-node discovery. On self-hosted n8n, open **Settings → Community Nodes**, select **Install**, and enter `@blackswampai/n8n-nodes-openanalytics`. For details, see the [n8n community node installation guide](https://docs.n8n.io/integrations/community-nodes/installation-and-management/gui-installation/).
 
 ## Compatibility
 
