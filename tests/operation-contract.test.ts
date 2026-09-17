@@ -19,32 +19,26 @@ describe('OpenAnalytics node operation contracts', () => {
 		expect(description.requestDefaults?.baseURL).toContain('api.getopen.so');
 	});
 
-	it('configures methods.listSearch with getSites', () => {
-		expect(node.methods?.listSearch?.getSites).toBeDefined();
-		expect(typeof node.methods?.listSearch?.getSites).toBe('function');
-	});
-
-	it('configures siteId as a resourceLocator with getSites in site, analytics, and revenue resources', () => {
+	it('asserts no property is named siteId because credentials are site-bound', () => {
 		const siteIdProperties = description.properties.filter(
 			(property) => property.name === 'siteId',
 		);
-		expect(siteIdProperties).toHaveLength(3);
+		expect(siteIdProperties).toHaveLength(0);
+	});
 
-		for (const prop of siteIdProperties) {
-			expect(prop.type).toBe('resourceLocator');
-			expect(prop.default).toEqual({ mode: 'list', value: '' });
-			expect(prop.required).toBe(true);
-			expect(prop.modes).toBeDefined();
-
-			const listMode = prop.modes?.find((m) => m.name === 'list');
-			expect(listMode).toBeDefined();
-			expect(listMode?.type).toBe('list');
-			expect(listMode?.typeOptions?.searchListMethod).toBe('getSites');
-			expect(listMode?.typeOptions?.searchable).toBe(true);
-
-			const idMode = prop.modes?.find((m) => m.name === 'id');
-			expect(idMode).toBeDefined();
-			expect(idMode?.type).toBe('string');
+	it('asserts no operation has x-oa-site in its routing headers', () => {
+		const operationProperties = description.properties.filter(
+			(property) => property.name === 'operation',
+		);
+		for (const prop of operationProperties) {
+			const options = prop.options as Array<{
+				name: string;
+				value: string;
+				routing?: { request?: { headers?: Record<string, string> } };
+			}>;
+			for (const opt of options) {
+				expect(opt.routing?.request?.headers?.['x-oa-site']).toBeUndefined();
+			}
 		}
 	});
 
@@ -53,7 +47,7 @@ describe('OpenAnalytics node operation contracts', () => {
 			assertRequiredControls(description, {
 				resource: 'site',
 				operation: 'get',
-				requiredControls: ['siteId'],
+				requiredControls: [],
 			}),
 		).not.toThrow();
 
@@ -82,7 +76,7 @@ describe('OpenAnalytics node operation contracts', () => {
 				assertRequiredControls(description, {
 					resource: 'analytics',
 					operation,
-					requiredControls: ['siteId', 'from', 'to'],
+					requiredControls: ['from', 'to'],
 				}),
 			).not.toThrow();
 		}
@@ -96,7 +90,7 @@ describe('OpenAnalytics node operation contracts', () => {
 				assertRequiredControls(description, {
 					resource: 'revenue',
 					operation,
-					requiredControls: ['siteId', 'from', 'to'],
+					requiredControls: ['from', 'to'],
 				}),
 			).not.toThrow();
 		}

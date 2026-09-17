@@ -6,10 +6,12 @@ This integration must remain clearly independent from the compatible service.
 
 For every vendor asset, record:
 
-| Packaged path                | Asset purpose                       | Official source URL         | Immutable commit/version | Access date | SHA-256                                                          | Current app reference checked               | License/trademark note                                                      |
-| ---------------------------- | ----------------------------------- | --------------------------- | ------------------------ | ----------- | ---------------------------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------- |
-| icons/openanalytics.svg      | Light mode node and credential icon | https://getopen.so/docs/api | 2026-09-16               | 2026-09-16  | caf57ba99cf592ed9f718cb582aefb10aac5a876ac4939d94ac7d8652de8b9b7 | Brand SVG glyph in documentation header     | Open Analytics open-source brand mark used solely to identify compatibility |
-| icons/openanalytics.dark.svg | Dark mode node and credential icon  | https://getopen.so/docs/api | 2026-09-16               | 2026-09-16  | cccf2a29182e521d68ad2b2869502c52eee4c08caec4102660e0a4c851d7b992 | Brand SVG glyph with contrasting light fill | Open Analytics open-source brand mark used solely to identify compatibility |
+| Packaged path                | Asset purpose                       | Official source URL         | Immutable commit/version | Access date | SHA-256                                                          | Current app reference checked           | License/trademark note                                                      |
+| ---------------------------- | ----------------------------------- | --------------------------- | ------------------------ | ----------- | ---------------------------------------------------------------- | --------------------------------------- | --------------------------------------------------------------------------- |
+| icons/openanalytics.svg      | Light mode node and credential icon | https://getopen.so/docs/api | 2026-09-16               | 2026-09-16  | caf57ba99cf592ed9f718cb582aefb10aac5a876ac4939d94ac7d8652de8b9b7 | Brand SVG glyph in brand blue (#296FF0) | Open Analytics open-source brand mark used solely to identify compatibility |
+| icons/openanalytics.dark.svg | Dark mode node and credential icon  | https://getopen.so/docs/api | 2026-09-16               | 2026-09-16  | caf57ba99cf592ed9f718cb582aefb10aac5a876ac4939d94ac7d8652de8b9b7 | Brand SVG glyph in brand blue (#296FF0) | Open Analytics open-source brand mark used solely to identify compatibility |
+
+Both light and dark mode variants share the official brand blue `#296FF0` glyph for consistent branding across themes.
 
 Prefer the official square product glyph actually referenced by the current application. Do not redraw, trace, recolor, or generate vendor marks. Verify light/dark source and packed assets by hash. If licensing or current-product identity is unclear, retain a neutral original integration icon and document the blocker rather than claiming permission.
 

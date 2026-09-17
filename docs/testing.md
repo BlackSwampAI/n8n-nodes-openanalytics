@@ -4,8 +4,8 @@
 
 - Use strict TypeScript `*.test.ts` files executed under Vitest.
 - Assert resource and operation visibility for `site` (`getAll`, `get`), `analytics` (`getOverview`, `getTimeseries`, `getPages`, `getSources`, `getGeography`, `getDevices`, `getSessions`), and `revenue` (`getSummary`, `getTimeseries`).
-- Validate that `siteId` is required on `site.get`, all `analytics` operations, and all `revenue` operations.
-- Ensure `from` and `to` date range controls default to valid ISO-8601 UTC timestamp expressions and require non-blank strings before transport.
+- Validate that `siteId` is not present on any resource because Open Analytics API keys are site-bound credentials.
+- Ensure `from` and `to` date range controls default to valid ISO-8601 UTC timestamp expressions and require non-blank strings before transport on analytics and revenue operations.
 - Verify `timezone` defaults to `UTC` and accepts standard IANA timezone identifiers.
 - Test error payloads matching `{ error: { code, message } }` with appropriate status code handling (400 for invalid dates, 401 for unauthorized, 429 for rate limiting with `Retry-After`).
 
@@ -15,12 +15,13 @@
 - Verify credential authentication header generates `Authorization: Bearer {{$credentials.apiKey}}`.
 - Verify operation routing paths:
   - `site.getAll`: `GET /v1/read/sites`
-  - `site.get`: `GET /v1/read/site` with `x-oa-site: ={{$parameter.siteId}}` header
-  - `analytics.*`: `GET /v1/read/analytics/:operation` with `x-oa-site` header and `from`, `to`, `timezone` query parameters
+  - `site.get`: `GET /v1/read/site`
+  - `analytics.*`: `GET /v1/read/analytics/:operation` with `from`, `to`, `timezone` query parameters
   - `analytics.getOverview`: optional `compare` and `resolution` query parameters
   - `analytics.getTimeseries`: optional `resolution` query parameter
-  - `revenue.getSummary`: `GET /v1/read/revenue/summary` with `x-oa-site` header, `from`, `to`, `timezone`, and optional `compare`, `currency` query parameters
-  - `revenue.getTimeseries`: `GET /v1/read/revenue/timeseries` with `x-oa-site` header, `from`, `to`, `timezone`, and optional `currency`, `resolution` (hour, day) query parameters
+  - `revenue.getSummary`: `GET /v1/read/revenue/summary` with `from`, `to`, `timezone`, and optional `compare`, `currency` query parameters
+  - `revenue.getTimeseries`: `GET /v1/read/revenue/timeseries` with `from`, `to`, `timezone`, and optional `currency`, `resolution` (hour, day) query parameters
+- Verify that no requests transmit `x-oa-site` headers because Open Analytics API keys scope queries to a single site automatically.
 - Prove one request/output sequence per input item and verify automatic item lineage remains intact.
 
 ### Programmatic execution responsibilities
@@ -44,20 +45,20 @@ Prior to release tagging, complete manual verification across all advertised ope
 | Resource    | Operation       | Parameters & Modes Tested                                                               |
 | ----------- | --------------- | --------------------------------------------------------------------------------------- |
 | `site`      | `getAll`        | Default execution, validates accessible site list                                       |
-| `site`      | `get`           | Dynamic dropdown (`getSites`) vs manual ID, validates metadata payload                  |
+| `site`      | `get`           | Default execution, validates metadata payload for credential-bound site                 |
 | `analytics` | `getOverview`   | `from`/`to` ISO dates, `timezone`, `compare=true`, `resolution` (`day`, `hour`)         |
 | `analytics` | `getTimeseries` | `from`/`to` ISO dates, `timezone`, `resolution` (`day`, `hour`, `week`)                 |
-| `analytics` | `getPages`      | `from`/`to` ISO dates, `timezone`, dynamic site dropdown vs manual ID                   |
-| `analytics` | `getSources`    | `from`/`to` ISO dates, `timezone`, dynamic site dropdown vs manual ID                   |
-| `analytics` | `getGeography`  | `from`/`to` ISO dates, `timezone`, dynamic site dropdown vs manual ID                   |
-| `analytics` | `getDevices`    | `from`/`to` ISO dates, `timezone`, dynamic site dropdown vs manual ID                   |
-| `analytics` | `getSessions`   | `from`/`to` ISO dates, `timezone`, dynamic site dropdown vs manual ID                   |
+| `analytics` | `getPages`      | `from`/`to` ISO dates, `timezone`                                                       |
+| `analytics` | `getSources`    | `from`/`to` ISO dates, `timezone`                                                       |
+| `analytics` | `getGeography`  | `from`/`to` ISO dates, `timezone`                                                       |
+| `analytics` | `getDevices`    | `from`/`to` ISO dates, `timezone`                                                       |
+| `analytics` | `getSessions`   | `from`/`to` ISO dates, `timezone`                                                       |
 | `revenue`   | `getSummary`    | `from`/`to` ISO dates, `timezone`, `compare=true`, `currency` filter                    |
 | `revenue`   | `getTimeseries` | `from`/`to` ISO dates, `timezone`, `currency` filter, `resolution` (`hour`, `day` only) |
 
 #### Cross-Cutting Test Dimensions
 
-- **Site Selection**: Dynamic site dropdown via `getSites` list search and manual site ID specification.
+- **Credential Scope**: Verify queries automatically scope to the site associated with the configured API key without `x-oa-site` header.
 - **Timezone**: Custom timezone identifiers (e.g., `America/New_York`, `UTC`) verifying day-boundary shifts.
 - **Comparative Analysis**: `compare=true` verification against previous period on overview and revenue summary.
 - **Currency Filtering**: 3-letter currency filtering (e.g. `USD`, `EUR`) on revenue endpoints.
