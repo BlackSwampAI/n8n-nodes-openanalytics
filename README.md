@@ -50,6 +50,13 @@ All analytics operations query data for a specific site identified by the `siteI
 - **Get Devices (`getDevices`)**: Breakdown of device types, browsers, and operating systems (`GET /v1/read/analytics/devices`).
 - **Get Sessions (`getSessions`)**: Bounce rate and visit duration engagement metrics (`GET /v1/read/analytics/sessions`).
 
+### Revenue
+
+All revenue operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
+
+- **Get Summary (`getSummary`)**: Fetch revenue totals, MRR, paying users, and conversion statistics (`GET /v1/read/revenue/summary`). Supports optional comparison with preceding period and currency filtering.
+- **Get Timeseries (`getTimeseries`)**: Fetch time-bucketed revenue metrics (`GET /v1/read/revenue/timeseries`). Supports time grain resolution (`hour`, `day`, `week`, `month`) and currency filtering.
+
 ## Usage
 
 - **Site Selection**: Sites can be selected dynamically from the dropdown list (`From List`, powered by dynamic search against `/v1/read/sites`) or specified directly by ID (`By ID`).

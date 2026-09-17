@@ -1,5 +1,6 @@
 import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from 'n8n-workflow';
 import { analyticsDescription } from './resources/analytics';
+import { revenueDescription } from './resources/revenue';
 import { siteDescription } from './resources/site';
 import { getSites } from './listSearch/getSites';
 
@@ -51,6 +52,10 @@ export class OpenAnalytics implements INodeType {
 						value: 'analytics',
 					},
 					{
+						name: 'Revenue',
+						value: 'revenue',
+					},
+					{
 						name: 'Site',
 						value: 'site',
 					},
@@ -58,6 +63,7 @@ export class OpenAnalytics implements INodeType {
 				default: 'analytics',
 			},
 			...analyticsDescription,
+			...revenueDescription,
 			...siteDescription,
 		],
 	};
