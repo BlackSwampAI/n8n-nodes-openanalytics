@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+- Republish under `@blackswampai/n8n-nodes-openanalytics` for n8n verification pre-check.
+
 ## 0.1.0
 
 Initial release.
