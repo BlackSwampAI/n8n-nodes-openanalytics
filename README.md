@@ -24,7 +24,9 @@ Do not present verified-node distribution as evidence of broader service, API, o
 
 Authenticate requests using an Open Analytics API key:
 
-1. In Open Analytics, open **Settings → API** (or your site settings) to create an API Bearer key.
+API keys in Open Analytics are site-bound credentials created per site in **Settings → API**. Each credential configured in n8n maps directly to that specific site. The Open Analytics API automatically scopes all requests to the site tied to the key and does not accept `X-OA-Site` headers.
+
+1. In Open Analytics, navigate to your site's **Settings → API** to create an API key.
 2. In n8n, open **Credentials → New Credential**, and choose **Open Analytics API**.
 3. Enter your **API Key**.
 4. (Optional) Set the **Base URL** to your self-hosted instance (defaults to `https://api.getopen.so`).
@@ -36,11 +38,11 @@ All requests include the Bearer token in the `Authorization` header.
 ### Site
 
 - **Get Many (`getAll`)**: Retrieve all sites accessible by the current credential (`GET /v1/read/sites`).
-- **Get (`get`)**: Fetch metadata and tracking script installation details for a specific site (`GET /v1/read/site`). The target site can be selected dynamically from the dropdown list or specified by ID.
+- **Get (`get`)**: Fetch metadata and tracking script installation details for the credential-bound site (`GET /v1/read/site`).
 
 ### Analytics
 
-All analytics operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
+All analytics operations query data for the site bound to the selected credential:
 
 - **Get Overview (`getOverview`)**: Fetch aggregate metrics including events, pageviews, and unique visitors (`GET /v1/read/analytics/overview`). Supports optional comparison with preceding period and time resolution (`hour`, `day`).
 - **Get Timeseries (`getTimeseries`)**: Fetch time-series metric data points (`GET /v1/read/analytics/timeseries`). Supports time resolution (`hour`, `day`, `week`).
@@ -52,23 +54,21 @@ All analytics operations query data for a specific site identified by the `siteI
 
 ### Revenue
 
-All revenue operations query data for a specific site identified by the `siteId` parameter (passed via `x-oa-site` header). Sites can be selected dynamically from the dropdown list or entered by ID:
+All revenue operations query data for the site bound to the selected credential:
 
 - **Get Summary (`getSummary`)**: Fetch revenue totals, MRR, paying users, and conversion statistics (`GET /v1/read/revenue/summary`). Supports optional comparison with preceding period and currency filtering.
 - **Get Timeseries (`getTimeseries`)**: Fetch time-bucketed revenue metrics (`GET /v1/read/revenue/timeseries`). Supports time resolution (`hour`, `day`) and currency filtering.
 
 ## Usage
 
-- **Site Selection**: Sites can be selected dynamically from the dropdown list (`From List`, powered by dynamic search against `/v1/read/sites`) or specified directly by ID (`By ID`).
+- **Site-Scoped Credentials**: Open Analytics API keys are generated per site. To query different sites, configure distinct credentials in n8n for each site's API key.
 - **Timestamp Formatting**: The `from` and `to` date range parameters require full ISO-8601 UTC timestamp strings (for example, `2026-09-01T00:00:00.000Z`). Date-only strings such as `2026-09-01` return a 400 Bad Request error from the API.
-- **Site Header**: Site-scoped requests automatically transmit the `siteId` parameter via the `x-oa-site` header.
 - **Timezone**: Set the `timezone` parameter to a valid IANA timezone identifier (such as `UTC` or `America/New_York`) to control day boundary bucketing.
 
 ## Troubleshooting
 
 - Confirm the base URL, account or organization scope, and credential permissions.
 - Verify that `from` and `to` timestamps are valid ISO-8601 UTC strings ending with `Z`.
-- Re-select dynamic list values after changing credentials or a parent selector.
 - Check HTTP 429 responses for `Retry-After` header values when approaching rate limits.
 - Report reproducible defects in [GitHub Issues](https://github.com/BlackSwampAI/n8n-nodes-openanalytics/issues) without including secrets.
 
