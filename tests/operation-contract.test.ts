@@ -24,11 +24,11 @@ describe('OpenAnalytics node operation contracts', () => {
 		expect(typeof node.methods?.listSearch?.getSites).toBe('function');
 	});
 
-	it('configures siteId as a resourceLocator with getSites in site, analytics, and revenue resources', () => {
+	it('configures siteId as a resourceLocator with getSites in site, analytics, revenue, and realtime resources', () => {
 		const siteIdProperties = description.properties.filter(
 			(property) => property.name === 'siteId',
 		);
-		expect(siteIdProperties).toHaveLength(3);
+		expect(siteIdProperties).toHaveLength(4);
 
 		for (const prop of siteIdProperties) {
 			expect(prop.type).toBe('resourceLocator');
@@ -102,11 +102,21 @@ describe('OpenAnalytics node operation contracts', () => {
 		}
 	});
 
-	it('configures declarative routing on all site, analytics, and revenue operations', () => {
+	it('enforces required controls for realtime operations', () => {
+		expect(() =>
+			assertRequiredControls(description, {
+				resource: 'realtime',
+				operation: 'getToken',
+				requiredControls: ['siteId'],
+			}),
+		).not.toThrow();
+	});
+
+	it('configures declarative routing on all site, analytics, revenue, and realtime operations', () => {
 		const operationProperties = description.properties.filter(
 			(property) => property.name === 'operation',
 		);
-		expect(operationProperties.length).toBeGreaterThanOrEqual(3);
+		expect(operationProperties.length).toBeGreaterThanOrEqual(4);
 
 		for (const prop of operationProperties) {
 			const options = prop.options as Array<{
@@ -115,7 +125,7 @@ describe('OpenAnalytics node operation contracts', () => {
 				routing?: { request?: { method?: string; url?: string } };
 			}>;
 			for (const opt of options) {
-				expect(opt.routing?.request?.method).toBe('GET');
+				expect(['GET', 'POST']).toContain(opt.routing?.request?.method);
 				expect(opt.routing?.request?.url).toMatch(/^\/v1\/read\//);
 			}
 		}

@@ -57,6 +57,10 @@ All revenue operations query data for a specific site identified by the `siteId`
 - **Get Summary (`getSummary`)**: Fetch revenue totals, MRR, paying users, and conversion statistics (`GET /v1/read/revenue/summary`). Supports optional comparison with preceding period and currency filtering.
 - **Get Timeseries (`getTimeseries`)**: Fetch time-bucketed revenue metrics (`GET /v1/read/revenue/timeseries`). Supports time grain resolution (`hour`, `day`, `week`, `month`) and currency filtering.
 
+### Realtime
+
+- **Get Token (`getToken`)**: Generate a short-lived authentication token for the realtime visitor stream and live presence check (`POST /v1/read/realtime/token`). The target site can be selected dynamically from the dropdown list or specified by ID.
+
 ## Usage
 
 - **Site Selection**: Sites can be selected dynamically from the dropdown list (`From List`, powered by dynamic search against `/v1/read/sites`) or specified directly by ID (`By ID`).
