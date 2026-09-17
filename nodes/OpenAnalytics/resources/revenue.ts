@@ -23,9 +23,6 @@ export const revenueDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/v1/read/revenue/summary',
-						headers: {
-							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
-						},
 						qs: {
 							from: '={{$parameter.from}}',
 							to: '={{$parameter.to}}',
@@ -43,9 +40,6 @@ export const revenueDescription: INodeProperties[] = [
 					request: {
 						method: 'GET',
 						url: '/v1/read/revenue/timeseries',
-						headers: {
-							'x-oa-site': '={{$parameter.siteId?.value || $parameter.siteId}}',
-						},
 						qs: {
 							from: '={{$parameter.from}}',
 							to: '={{$parameter.to}}',
@@ -56,35 +50,6 @@ export const revenueDescription: INodeProperties[] = [
 			},
 		],
 		default: 'getSummary',
-	},
-	{
-		displayName: 'Site',
-		name: 'siteId',
-		type: 'resourceLocator',
-		default: { mode: 'list', value: '' },
-		required: true,
-		displayOptions: {
-			show: showOnlyForRevenue,
-		},
-		description: 'The site to query. Choose from the list, or specify an ID.',
-		modes: [
-			{
-				displayName: 'From List',
-				name: 'list',
-				type: 'list',
-				placeholder: 'Select a site...',
-				typeOptions: {
-					searchListMethod: 'getSites',
-					searchable: true,
-				},
-			},
-			{
-				displayName: 'By ID',
-				name: 'id',
-				type: 'string',
-				placeholder: 'e.g. site_12345',
-			},
-		],
 	},
 	{
 		displayName: 'From',

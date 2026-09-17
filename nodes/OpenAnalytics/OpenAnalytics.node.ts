@@ -2,14 +2,8 @@ import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from '
 import { analyticsDescription } from './resources/analytics';
 import { revenueDescription } from './resources/revenue';
 import { siteDescription } from './resources/site';
-import { getSites } from './listSearch/getSites';
 
 export class OpenAnalytics implements INodeType {
-	methods = {
-		listSearch: {
-			getSites,
-		},
-	};
 	description: INodeTypeDescription = {
 		displayName: 'Open Analytics',
 		name: 'openAnalytics',
