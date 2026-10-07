@@ -23,6 +23,8 @@ Do not present verified-node distribution as evidence of broader service, API, o
 
 This package is independent of OpenLabs and its products. Source review separates the [released Open Analytics v0.8.0 source](https://github.com/OpenLabs-so/openanalytics/tree/a07da7020810d3a975524daad2a544c9205ea65e) from [current main at the review date](https://github.com/OpenLabs-so/openanalytics/compare/a07da7020810d3a975524daad2a544c9205ea65e...f7fc9169f32d48e55eb9106bceae9e87b6aa6bb9); neither establishes hosted deployment behavior. The n8n OAuth implementation was source-reviewed at [n8n 2.41.7](https://github.com/n8n-io/n8n/tree/dcba26c8a530d63041cd8298b8b30295d5476f6f). See the [API matrix](docs/api-matrix.md) and [testing notes](docs/testing.md) for exact source links and unverified surfaces.
 
+Known limitation: Open Analytics [issue #10](https://github.com/OpenLabs-so/openanalytics/issues/10) proposes workspace-related changes that may affect owner and site-selection semantics if shipped. This integration does not implement those proposed changes; recheck compatibility if that work is released.
+
 ## Credentials
 
 Authenticate requests using an Open Analytics API key:
@@ -38,7 +40,23 @@ API-key requests include the Bearer token in the `Authorization` header.
 
 Revenue also offers an optional **Open Analytics OAuth2 API** credential using public-client PKCE. Released Open Analytics v0.8.0 accepts an OAuth user or signed-in session user with `revenue:read` and owner membership; this node supports the OAuth user path only. Site-bound API keys cannot mint that scope. The public API reference's `X-OA-Site` examples conflict with v0.8.0 key handling, which rejects that header for API-key auth.
 
-Register a public OAuth client on your Open Analytics installation first, including the exact n8n OAuth callback URL. For n8n, use an exact HTTPS or loopback callback URL without wildcards. The upstream registration policy accepts public clients (`token_endpoint_auth_method: none`) and also supports native private-use schemes; n8n uses a web callback. Registered clients use `authorization_code` and `refresh_token` grants. This node does not call the registration endpoint or reuse first-party CLI/MCP clients.
+Register a public OAuth client on your Open Analytics installation first. The released v0.8.0 registration endpoint is public and anonymous; it does not require an Open Analytics account or administrator. It is rate-limited per IP and responds with HTTP 429 and `Retry-After` when limited. Before submitting the request, replace the entire example redirect URI with the exact OAuth Redirect URL shown by your n8n OAuth credential screen. For n8n, use an exact HTTPS or loopback callback URL without wildcards. The upstream registration policy also supports native private-use schemes; n8n uses a web callback. Registered clients use `authorization_code` and `refresh_token` grants. This node does not call the registration endpoint or reuse first-party CLI/MCP clients.
+
+For the hosted service, send the request to `https://api.getopen.so/v1/oauth/register`. For self-hosting, replace that base URL with the same Open Analytics installation configured in the n8n credential. This example is derived from released v0.8.0 source and has not been executed against the hosted service:
+
+```sh
+curl --request POST 'https://api.getopen.so/v1/oauth/register' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "client_name": "n8n",
+    "redirect_uris": ["https://<your-n8n>/rest/oauth2-credential/callback"],
+    "token_endpoint_auth_method": "none",
+    "grant_types": ["authorization_code", "refresh_token"],
+    "scope": "site:read revenue:read offline_access"
+  }'
+```
+
+Copy the returned `client_id` into the n8n credential's **Client ID**, then connect the credential by signing in with an account that owns the selected site. Registration creates a public OAuth client; it does not grant Revenue access. See the [released registration route](https://github.com/OpenLabs-so/openanalytics/blob/a07da7020810d3a975524daad2a544c9205ea65e/apps/api/src/http/oauth-register.ts) and [client policy](https://github.com/OpenLabs-so/openanalytics/blob/a07da7020810d3a975524daad2a544c9205ea65e/packages/domain/src/oauth-registration.ts).
 
 Enter the already-registered client ID in the credential and the canonical site UUID in each Revenue node. Set the credential's Base URL to your Open Analytics installation; the hidden authorization and token URLs derive from that value. The default Base URL is `https://api.getopen.so`, with authorization and token endpoints at `/api/auth/oauth2/authorize` and `/api/auth/oauth2/token`. Discovery on that installation is at `/api/auth/.well-known/openid-configuration`. Released source configures one-hour access tokens and 30-day refresh tokens; actual hosted deployment behavior is unverified. Open Analytics checks current membership and owner role on every Revenue request.
 

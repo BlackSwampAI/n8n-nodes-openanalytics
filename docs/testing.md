@@ -71,16 +71,16 @@ Multipart handling is not applicable to this JSON REST integration. Mocked route
 
 ### OAuth source contract (not a live smoke)
 
-| Setting          | Released v0.8.0 evidence                                                                         |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| Discovery        | `GET /api/auth/.well-known/openid-configuration`                                                 |
-| Authorization    | `GET /api/auth/oauth2/authorize`                                                                 |
-| Token            | `POST /api/auth/oauth2/token`                                                                    |
-| Registration     | `POST /v1/oauth/register`; called manually by the operator, never by this node                   |
-| Client policy    | Public only (`token_endpoint_auth_method: none`); exact HTTPS or loopback callback, no wildcards |
-| Grants           | `authorization_code`, `refresh_token`; device grant remains first-party only                     |
-| Requested scopes | `site:read revenue:read offline_access`                                                          |
-| Token lifetimes  | One-hour access token; 30-day refresh token                                                      |
+| Setting          | Released v0.8.0 evidence                                                                                                                                                           |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Discovery        | `GET /api/auth/.well-known/openid-configuration`                                                                                                                                   |
+| Authorization    | `GET /api/auth/oauth2/authorize`                                                                                                                                                   |
+| Token            | `POST /api/auth/oauth2/token`                                                                                                                                                      |
+| Registration     | `POST /v1/oauth/register`; anonymous public manual registration, no account authentication required; never called by this node (released v0.8.0 source-derived, not hosted-tested) |
+| Client policy    | Public only (`token_endpoint_auth_method: none`); exact HTTPS or loopback callback, no wildcards                                                                                   |
+| Grants           | `authorization_code`, `refresh_token`; device grant remains first-party only                                                                                                       |
+| Requested scopes | `site:read revenue:read offline_access`                                                                                                                                            |
+| Token lifetimes  | One-hour access token; 30-day refresh token                                                                                                                                        |
 
 The public API reference examples show `X-OA-Site`, which released key handling rejects when authentication uses an API key. For released v0.8.0, the source-level read-scope and middleware policy are more specific: API keys cannot mint `revenue:read`, Revenue requires a user principal, and the selected site must have a live owner membership. The node validates only the local Site ID UUID; it does not claim to assert token connectivity, user scope, membership, or role. The native n8n credential handles authorization-code PKCE and refresh; this test suite mocks the wrapper boundary and does not claim that the auth browser flow, token refresh, hosted service, or current hosted deployment was exercised.
 
@@ -94,6 +94,8 @@ Immutable sources: [released key handling](https://github.com/OpenLabs-so/openan
 - Submit only the exact published package version, then visually inspect the Creator Portal card version and logo to verify metadata synchronization.
 
 ## Publication verification
+
+Before a release, qualify OAuth sign-in, token refresh, and `X-OA-Site` in a real n8n instance, and qualify the hosted `publish` workflow through its real tag-triggered path. Those checks remain pending. The release-tag guard was run locally against the existing annotated `v0.1.1` tag, which is only a partial check and does not qualify GitHub Actions checkout or publication behavior. Do not retag or reuse that version.
 
 - Execute `npm run release` within an immutable, tag-triggered `publish` GitHub Actions job with scoped OIDC permissions (`id-token: write`).
 - Run `npm run scan:published` only in a fresh, read-only `verify-published` job that depends on `publish` and performs its own checkout, Node setup, and `npm ci`.
