@@ -21,3 +21,7 @@ Open Analytics API keys are site-bound credentials generated per site in Setting
 For each ordinary REST operation, begin with declarative routing and record which routing, expressions, pagination, `preSend`, or `postReceive` behavior implements its contract. A programmatic row must identify the concrete requirement that declarative routing cannot safely express, such as a trigger, GraphQL/non-REST protocol, external runtime dependency, incoming-data transformation, or full node versioning. Generic "weird JSON" is not an exception.
 
 Also verify path encoding, identifiers and response wrappers, list pagination, empty behavior, errors, update preservation, and edition boundaries. Prefer current documented routes; record pinned-version compatibility differences explicitly. Do not advertise an operation solely because it exists in OpenAPI.
+
+## Template source hygiene
+
+Registered source and compiled modules must expose one case-exact filename-derived constructible export. The smoke rejects redundant constructor aliases as template hygiene; n8n's loader selects the filename-derived export key. AST review rejects property files that contain only empty typed `INodeProperties[]` placeholders and import/type scaffolding. Remove one only after checking the assembled node description and proving shared parameters and routing retain operation visibility, required controls, request construction, and output handling. Ordinary requests use JSON; multipart examples require evidence before adding custom execution code.

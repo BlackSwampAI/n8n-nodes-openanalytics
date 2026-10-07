@@ -21,6 +21,7 @@ const hasPlaceholder = (value) =>
 		/YOUR[-_][A-Z0-9_-]+/.test(value));
 
 const packageJson = JSON.parse(read('package.json'));
+const packageLock = JSON.parse(read('package-lock.json'));
 const readme = read('README.md');
 const releasing = read('RELEASING.md');
 const sourceScanner = read('scripts/scan-source.mjs');
@@ -91,17 +92,44 @@ if (packageJson.scripts?.test !== 'vitest run') fail('test must run Vitest');
 if (!packageJson.scripts?.typecheck?.includes('tsconfig.test.json'))
 	fail('typecheck must include strict test TypeScript');
 if (packageJson.devDependencies?.vitest !== '4.1.11') fail('Vitest must be pinned to 4.1.11');
-if (packageJson.devDependencies?.['@n8n/scan-community-package'] !== '0.34.0')
-	fail('official community scanner must be pinned to 0.34.0');
+if (packageJson.devDependencies?.['@n8n/scan-community-package'] !== '0.38.0')
+	fail('official community scanner must be pinned to 0.38.0');
+const rootTypeScript = packageLock.packages?.['node_modules/typescript'];
+const scannerTypeScript =
+	packageLock.packages?.['node_modules/@n8n/scan-community-package/node_modules/typescript'];
+const scannerTypeScriptCompiler =
+	packageLock.packages?.[
+		'node_modules/@n8n/scan-community-package/node_modules/typescript/node_modules/@typescript/old'
+	];
+if (rootTypeScript?.version !== '5.9.3' || rootTypeScript?.name)
+	fail('root TypeScript must remain the pinned 5.9.3 compiler');
+if (
+	scannerTypeScript?.name !== '@typescript/typescript6' ||
+	scannerTypeScript?.version !== '6.0.2' ||
+	!scannerTypeScript?.bin?.tsc6
+)
+	fail('scanner TypeScript 6 alias must remain nested beneath the scanner');
+if (
+	scannerTypeScriptCompiler?.name !== 'typescript' ||
+	scannerTypeScriptCompiler?.version !== '6.0.3' ||
+	!scannerTypeScriptCompiler?.bin?.tsc ||
+	!scannerTypeScriptCompiler?.bin?.tsserver ||
+	packageLock.packages?.['node_modules/@typescript/old']
+)
+	fail('scanner TypeScript compiler binaries must remain nested and cannot replace root tsc');
+if (packageJson.scripts?.dev !== 'node scripts/dev.mjs')
+	fail('dev must launch the port-pinned wrapper');
+if (packageJson.scripts?.['review:source'] !== 'node scripts/review-node-source.mjs')
+	fail('review:source must run the source review');
 if (packageJson.packageManager !== 'npm@11.19.0') fail('packageManager must pin npm@11.19.0');
 try {
 	const templateMarker = JSON.parse(read('.blackswamp/template.json'));
 	if (
 		templateMarker.schemaVersion !== 1 ||
-		templateMarker.templateVersion !== '2.1.0' ||
+		templateMarker.templateVersion !== '2.2.0' ||
 		templateMarker.sourceRepository !== TEMPLATE_ORIGIN
 	)
-		fail('.blackswamp/template.json must identify template baseline 2.1.0');
+		fail('.blackswamp/template.json must identify template baseline 2.2.0');
 } catch {
 	fail('.blackswamp/template.json must contain valid JSON');
 }
@@ -160,9 +188,44 @@ if (/id-token:\s*write/.test(verifyPublishedJob))
 	fail('verify-published must not receive id-token: write');
 if (!publishWorkflow.includes('secrets.NPM_TOKEN'))
 	fail('publish must retain bootstrap token support');
+const publishCheckout = publishJob.indexOf('actions/checkout@v6');
+const releaseTagGuard = publishJob.indexOf('node scripts/verify-release-tag.mjs');
+const publishSetup = publishJob.indexOf('actions/setup-node@v6');
+const publishInstall = publishJob.indexOf('npm ci');
+const publishAuth = publishJob.indexOf('node scripts/prepare-npm-auth.mjs');
+const publishRelease = publishJob.indexOf('npm run release');
+const firstCheckoutStepEnd = publishJob.indexOf('\n      - ', publishCheckout + 1);
+const firstCheckoutStep = publishJob.slice(publishCheckout, firstCheckoutStepEnd);
+const nextStepEnd = publishJob.indexOf('\n      - ', firstCheckoutStepEnd + 1);
+const stepAfterCheckout = publishJob.slice(firstCheckoutStepEnd, nextStepEnd);
+if (
+	publishCheckout < 0 ||
+	firstCheckoutStepEnd < 0 ||
+	!firstCheckoutStep.includes('fetch-depth: 0') ||
+	!stepAfterCheckout.includes('node scripts/verify-release-tag.mjs') ||
+	releaseTagGuard < firstCheckoutStepEnd ||
+	[publishSetup, publishInstall, publishAuth, publishRelease].some(
+		(position) => position < releaseTagGuard,
+	)
+)
+	fail('publish must fetch full history and verify the release tag immediately after checkout');
+const notifyJob = publishWorkflow.split(/\n {2}notify-discord:\s*\n/)[1] ?? '';
+if (
+	!notifyJob.includes('needs: [publish, verify-published]') ||
+	!notifyJob.includes('contents: read') ||
+	!notifyJob.includes('node scripts/notify-discord.mjs') ||
+	!notifyJob.includes('secrets.DISCORD_WEBHOOK') ||
+	!notifyJob.includes('continue-on-error: true') ||
+	/id-token:\s*write|NODE_AUTH_TOKEN|secrets\.NPM_TOKEN/.test(notifyJob)
+)
+	fail('Discord notification must be optional, read-only, and depend on both release jobs');
 for (const path of [
 	'scripts/prepare-npm-auth.mjs',
 	'scripts/verify-npm-version.mjs',
+	'scripts/verify-release-tag.mjs',
+	'scripts/review-node-source.mjs',
+	'scripts/dev.mjs',
+	'scripts/notify-discord.mjs',
 	'scripts/scan-source.mjs',
 	'scripts/scan-published.mjs',
 	'scripts/node-load-smoke.mjs',
@@ -199,11 +262,12 @@ for (const [label, workflow] of [
 	['CI', ciWorkflow],
 	['publish', publishWorkflow],
 ]) {
+	const review = workflow.indexOf('npm run review:source');
 	const build = workflow.indexOf('npm run build');
 	const scan = workflow.indexOf('npm run scan:source');
 	const pack = workflow.indexOf('npm run package:check');
-	if (build < 0 || scan < build || pack < scan)
-		fail(`${label} must scan source and built output after build and before packaging`);
+	if (review < 0 || build < review || scan < build || pack < scan)
+		fail(`${label} must review source before build, then scan before packaging`);
 	for (const command of ['npm run smoke:load', 'npm run smoke:install']) {
 		if (!workflow.includes(command)) fail(`${label} must run ${command}`);
 	}

@@ -33,6 +33,10 @@ API keys in Open Analytics are site-bound credentials created per site in **Sett
 
 All requests include the Bearer token in the `Authorization` header.
 
+## Local development
+
+Run `npm run dev -- --custom-user-folder "$PWD/.codex-scratch/n8n-node-run"` to start an isolated local n8n instance on port 5690. Open `http://localhost:5690` manually; the CLI browser shortcut targets port 5678. Never attach to or stop an existing service on 5678. If 5690 is occupied, report the conflict and explicitly run `N8N_PORT=5692 npm exec -- n8n-node dev --custom-user-folder "$PWD/.codex-scratch/n8n-node-run"`; do not fall back silently.
+
 ## Operations
 
 ### Site
