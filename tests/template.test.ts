@@ -33,7 +33,7 @@ describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling',
 		expect(packageJson.engines.node).toBe('>=22.22.0');
 		expect(packageJson.devDependencies).toMatchObject({
 			'@n8n/node-cli': '0.46.4',
-			'@n8n/scan-community-package': '0.34.0',
+			'@n8n/scan-community-package': '0.38.0',
 			eslint: '9.39.4',
 			prettier: '3.8.3',
 			'release-it': '20.2.0',
@@ -79,12 +79,14 @@ describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling',
 		};
 		expect(marker).toEqual({
 			schemaVersion: 1,
-			templateVersion: '2.1.0',
+			templateVersion: '2.2.0',
 			sourceRepository: 'https://github.com/christopherjnelson/n8n-community-node-template',
 		});
 		const migrations = await read('docs/TEMPLATE_MIGRATIONS.md');
 		expect(migrations).toContain('Generated repositories do not inherit later template changes');
 		expect(migrations).toContain('## 2.1.0');
+		expect(migrations).toContain('## 2.2.0');
+		expect(migrations).toContain('596e784cfe69cd8894529b8a81c491921cde9773');
 		expect(migrations).toContain('declarative routing');
 	});
 
@@ -142,7 +144,34 @@ describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling',
 			read('package.json'),
 		]);
 		expect(releaseCheck).toContain('TEMPLATE_ORIGIN');
-		expect(releaseCheck).toContain("templateMarker.templateVersion !== '2.1.0'");
+		expect(releaseCheck).toContain("templateMarker.templateVersion !== '2.2.0'");
+		expect(releaseCheck).toContain("dev !== 'node scripts/dev.mjs'");
+		expect(releaseCheck).toContain('verify-release-tag.mjs');
+		expect(releaseCheck).toContain('review:source');
+		expect(ci).toContain('workflow_dispatch:');
+		expect(publish).toContain('node scripts/notify-discord.mjs');
+		expect(packageJsonText).toContain('0.38.0');
+		const lock = JSON.parse(await read('package-lock.json')) as {
+			packages: Record<string, { name?: string; version?: string; bin?: Record<string, string> }>;
+		};
+		expect(lock.packages['node_modules/typescript'].version).toBe('5.9.3');
+		expect(
+			lock.packages['node_modules/@n8n/scan-community-package/node_modules/typescript'],
+		).toMatchObject({
+			name: '@typescript/typescript6',
+			version: '6.0.2',
+			bin: { tsc6: 'bin/tsc6' },
+		});
+		expect(
+			lock.packages[
+				'node_modules/@n8n/scan-community-package/node_modules/typescript/node_modules/@typescript/old'
+			],
+		).toMatchObject({
+			name: 'typescript',
+			version: '6.0.3',
+			bin: { tsc: 'bin/tsc', tsserver: 'bin/tsserver' },
+		});
+		expect(lock.packages['node_modules/@typescript/old']).toBeUndefined();
 		expect(releaseCheck).toContain(
 			"const canonicalExample = 'dist/nodes/GithubIssues/GithubIssues.node.js'",
 		);
@@ -193,6 +222,8 @@ describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling',
 		expect(await read('scripts/node-load-smoke.mjs')).toContain(
 			'Packaged SVG icon needs a usable viewBox',
 		);
+		expect(await read('scripts/node-load-smoke.mjs')).toContain('constructible exports');
+		expect(await read('scripts/review-node-source.mjs')).toContain('findEmptyPropertyPlaceholders');
 		expect(await read('docs/branding.md')).toContain('Creator Portal card version and logo');
 	});
 });

@@ -1,6 +1,8 @@
 dist/
 node_modules/
 .npm-cache/
+.codex-scratch/
 *.tgz
 .vscode/
 CODE_OF_CONDUCT.md
+.codex-worktrees/

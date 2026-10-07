@@ -80,3 +80,9 @@ Prior to release tagging, complete manual verification across all advertised ope
 - Run `npm run scan:published` only in a fresh, read-only `verify-published` job that depends on `publish` and performs its own checkout, Node setup, and `npm ci`.
 - If verification fails after npm publication, inspect registry status and rerun only the failed verification job; never rerun a successful publish job for an existing version.
 - Treat only documented registry metadata replication lag as retryable.
+
+### Source and package template checks
+
+Run `npm run review:source` before build. It statically rejects empty property-only placeholders, and the compiled load smoke checks case-exact filename-derived constructors while treating redundant aliases as template hygiene rather than an n8n loader rule. Unit and metadata tests do not establish real editor or API behavior.
+
+For editor qualification, `npm run dev -- --custom-user-folder "$PWD/.codex-scratch/n8n-node-run"` uses port 5690; open it manually because the CLI browser shortcut targets 5678. If 5690 is occupied, run `N8N_PORT=5692 npm exec -- n8n-node dev --custom-user-folder "$PWD/.codex-scratch/n8n-node-run"` explicitly; never touch an existing service on 5678.

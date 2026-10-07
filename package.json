@@ -22,7 +22,7 @@
 	"scripts": {
 		"build": "n8n-node build",
 		"build:watch": "tsc --watch",
-		"dev": "n8n-node dev",
+		"dev": "node scripts/dev.mjs",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "n8n-node lint",
@@ -35,9 +35,10 @@
 		"smoke:load": "node scripts/node-load-smoke.mjs",
 		"smoke:install": "node scripts/package-install-smoke.mjs",
 		"release:check": "node scripts/release-check.mjs",
-		"package:check": "npm run release:check && npm pack --dry-run --json --cache .npm-cache | node scripts/validate-pack.mjs",
+		"package:check": "npm run release:check && npm run review:source && npm pack --dry-run --json --cache .npm-cache | node scripts/validate-pack.mjs",
 		"release": "n8n-node release",
-		"prepublishOnly": "n8n-node prerelease"
+		"prepublishOnly": "n8n-node prerelease",
+		"review:source": "node scripts/review-node-source.mjs"
 	},
 	"files": [
 		"dist"
@@ -54,7 +55,7 @@
 	},
 	"devDependencies": {
 		"@n8n/node-cli": "0.46.4",
-		"@n8n/scan-community-package": "0.34.0",
+		"@n8n/scan-community-package": "0.38.0",
 		"eslint": "9.39.4",
 		"prettier": "3.8.3",
 		"release-it": "20.2.0",
