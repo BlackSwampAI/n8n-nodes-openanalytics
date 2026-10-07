@@ -11,7 +11,18 @@ describe('OpenAnalytics node operation contracts', () => {
 	const description = node.description;
 
 	it('configures credentials and request defaults for Open Analytics API', () => {
-		expect(description.credentials).toEqual([{ name: 'openAnalyticsApi', required: true }]);
+		expect(description.credentials).toEqual([
+			{
+				name: 'openAnalyticsApi',
+				required: true,
+				displayOptions: { show: { authentication: ['apiKey'] } },
+			},
+			{
+				name: 'openAnalyticsOAuth2Api',
+				required: true,
+				displayOptions: { show: { authentication: ['oauth2'] } },
+			},
+		]);
 		expect(description.requestDefaults?.headers).toEqual({
 			Accept: 'application/json',
 			'Content-Type': 'application/json',
@@ -19,11 +30,26 @@ describe('OpenAnalytics node operation contracts', () => {
 		expect(description.requestDefaults?.baseURL).toContain('api.getopen.so');
 	});
 
-	it('asserts no property is named siteId because credentials are site-bound', () => {
+	it('defaults authentication to API key and keeps the selector available to legacy Revenue workflows', () => {
+		expect(description.properties[0]?.name).toBe('authentication');
+		const auth = description.properties.find((property) => property.name === 'authentication');
+		expect(auth?.default).toBe('apiKey');
+		expect(auth?.displayOptions).toBeUndefined();
+		expect(
+			(auth?.options as Array<{ value: string; name: string }>).map((option) => option.value),
+		).toEqual(['apiKey', 'oauth2']);
+	});
+
+	it('shows an explicit Site ID only for OAuth2 Revenue requests', () => {
 		const siteIdProperties = description.properties.filter(
 			(property) => property.name === 'siteId',
 		);
-		expect(siteIdProperties).toHaveLength(0);
+		expect(siteIdProperties).toHaveLength(1);
+		expect(siteIdProperties[0].required).toBe(true);
+		expect(siteIdProperties[0].displayOptions?.show).toEqual({
+			resource: ['revenue'],
+			authentication: ['oauth2'],
+		});
 	});
 
 	it('asserts no operation has x-oa-site in its routing headers', () => {

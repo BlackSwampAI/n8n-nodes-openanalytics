@@ -1,4 +1,5 @@
 import type { INodeProperties } from 'n8n-workflow';
+import { prepareRevenueRequest, revenueRequestBoundary } from '../revenue-auth';
 
 const showOnlyForRevenue = {
 	resource: ['revenue'],
@@ -18,8 +19,10 @@ export const revenueDescription: INodeProperties[] = [
 				name: 'Get Summary',
 				value: 'getSummary',
 				action: 'Get revenue summary',
-				description: 'Get revenue totals, MRR, paying users, and conversion stats for a date range',
+				description: 'Get revenue totals and optional preceding-period comparison',
 				routing: {
+					operations: { pagination: revenueRequestBoundary },
+					send: { paginate: true, preSend: [prepareRevenueRequest] },
 					request: {
 						method: 'GET',
 						url: '/v1/read/revenue/summary',
@@ -37,6 +40,8 @@ export const revenueDescription: INodeProperties[] = [
 				action: 'Get revenue timeseries',
 				description: 'Get revenue metrics over time at a specified resolution',
 				routing: {
+					operations: { pagination: revenueRequestBoundary },
+					send: { paginate: true, preSend: [prepareRevenueRequest] },
 					request: {
 						method: 'GET',
 						url: '/v1/read/revenue/timeseries',
@@ -110,11 +115,12 @@ export const revenueDescription: INodeProperties[] = [
 				},
 			},
 			{
-				displayName: 'Currency',
+				displayName: 'Legacy Currency',
 				name: 'currency',
 				type: 'string',
 				default: '',
-				description: 'Filter or convert to a specific 3-letter currency code (e.g. USD, EUR)',
+				description:
+					'Legacy query parameter retained for saved workflows. The source-reviewed release ignores it and uses the site reporting currency; see compatibility documentation for version details.',
 				routing: {
 					send: {
 						type: 'query',
@@ -138,11 +144,12 @@ export const revenueDescription: INodeProperties[] = [
 		},
 		options: [
 			{
-				displayName: 'Currency',
+				displayName: 'Legacy Currency',
 				name: 'currency',
 				type: 'string',
 				default: '',
-				description: 'Filter or convert to a specific 3-letter currency code (e.g. USD, EUR)',
+				description:
+					'Legacy query parameter retained for saved workflows. The source-reviewed release ignores it and uses the site reporting currency; see compatibility documentation for version details.',
 				routing: {
 					send: {
 						type: 'query',

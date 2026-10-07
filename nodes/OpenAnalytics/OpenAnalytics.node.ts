@@ -2,6 +2,7 @@ import { NodeConnectionTypes, type INodeType, type INodeTypeDescription } from '
 import { analyticsDescription } from './resources/analytics';
 import { revenueDescription } from './resources/revenue';
 import { siteDescription } from './resources/site';
+import { guardNonRevenueOAuth } from './revenue-auth';
 
 export class OpenAnalytics implements INodeType {
 	description: INodeTypeDescription = {
@@ -25,6 +26,12 @@ export class OpenAnalytics implements INodeType {
 			{
 				name: 'openAnalyticsApi',
 				required: true,
+				displayOptions: { show: { authentication: ['apiKey'] } },
+			},
+			{
+				name: 'openAnalyticsOAuth2Api',
+				required: true,
+				displayOptions: { show: { authentication: ['oauth2'] } },
 			},
 		],
 		requestDefaults: {
@@ -35,6 +42,28 @@ export class OpenAnalytics implements INodeType {
 			},
 		},
 		properties: [
+			{
+				displayName: 'Authentication',
+				name: 'authentication',
+				type: 'options',
+				noDataExpression: true,
+				routing: { send: { preSend: [guardNonRevenueOAuth] } },
+				options: [
+					{
+						name: 'API Key',
+						value: 'apiKey',
+						description: 'Use a site-bound API key; Revenue support depends on the server',
+					},
+					{
+						name: 'OAuth2 (Revenue Only)',
+						value: 'oauth2',
+						description: 'Use OAuth2 for Revenue requests',
+					},
+				],
+				default: 'apiKey',
+				description:
+					'OAuth2 is supported for Revenue requests only. Keep API Key selected for Analytics and Site.',
+			},
 			{
 				displayName: 'Resource',
 				name: 'resource',
@@ -57,6 +86,16 @@ export class OpenAnalytics implements INodeType {
 				default: 'analytics',
 			},
 			...analyticsDescription,
+			{
+				displayName: 'Site ID',
+				name: 'siteId',
+				type: 'string',
+				required: true,
+				default: '',
+				displayOptions: { show: { resource: ['revenue'], authentication: ['oauth2'] } },
+				description:
+					'Canonical UUID of a site where your account has an owner membership. Open Analytics enforces current membership and revenue:read access.',
+			},
 			...revenueDescription,
 			...siteDescription,
 		],
