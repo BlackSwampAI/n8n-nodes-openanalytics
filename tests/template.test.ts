@@ -43,6 +43,7 @@ describe('@blackswampai/n8n-nodes-openanalytics package invariants and tooling',
 		expect(packageJson.n8n.nodes).toEqual(['dist/nodes/OpenAnalytics/OpenAnalytics.node.js']);
 		expect(packageJson.n8n.credentials).toEqual([
 			'dist/credentials/OpenAnalyticsApi.credentials.js',
+			'dist/credentials/OpenAnalyticsOAuth2Api.credentials.js',
 		]);
 	});
 
